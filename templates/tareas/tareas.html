@@ -206,54 +206,37 @@
 </script>
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script>
-    // Establecer conexión con WebSocket
-    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    // Conectar al servidor de WebSockets
+    var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
-    // Escuchar el evento 'tarea_creada' enviado desde el servidor
+    // Escuchar el evento 'tarea_creada' para mostrar una notificación o actualizar la tabla
     socket.on('tarea_creada', function(data) {
-        // Extraer la información de la tarea recibida
-        var tareaID = data.tarea.tareaID;
-        var titulo = data.tarea.titulo;
-        var descripcion = data.tarea.descripcion;
-        var estado = data.tarea.estado;
-        var asignadaA = data.tarea.asignado_a.nombreEmpleado;
+        alert(data.mensaje);  // Notificación simple
+        // Aquí también podrías actualizar dinámicamente la tabla de tareas
+        let tableBody = document.getElementById('tarea-table-body');
+        let newRow = tableBody.insertRow(0);  // Insertar al principio
+        newRow.innerHTML = `
+            <td>${data.tareaID}</td>
+            <td>${data.titulo}</td>
+            <td>${data.descripcion}</td>
+            <td>${data.estado}</td>
+            <td>${data.asignadaA}</td>
+            <td>
+                <button type="button" class="btn-action edit" onclick="openModalEditarTarea(${data.tareaID})">
+                    <i class='bx bxs-edit'></i>
+                </button>
+                <a href="javascript:void(0);" class="btn-action delete" onclick="confirmarEliminacion(${data.tareaID})">
+                    <i class='bx bxs-trash'></i>
+                </a>
+            </td>
+        `;
+    });
 
-        // Seleccionar la fila correspondiente en la tabla por el ID de la tarea
-        var filaTarea = document.querySelector(`tr[data-id="${tareaID}"]`);
-        
-        if (filaTarea) {
-            // Si la fila existe, actualizar los valores de los campos
-            filaTarea.querySelector('.titulo').textContent = titulo;
-            filaTarea.querySelector('.descripcion').textContent = descripcion;
-            filaTarea.querySelector('.estado').textContent = estado;
-            filaTarea.querySelector('.asignadaA').textContent = asignadaA;
-            
-            // Opcional: Cambiar el color o resaltar la fila como indicativo de la actualización
-            filaTarea.classList.add('updated');
-            setTimeout(() => filaTarea.classList.remove('updated'), 2000);
-        } else {
-            // Si no existe, agregar una nueva fila en la tabla
-            var tablaCuerpo = document.getElementById('tarea-table-body');
-            var nuevaFila = document.createElement('tr');
-            nuevaFila.setAttribute('data-id', tareaID);
-
-            nuevaFila.innerHTML = `
-                <td>${tareaID}</td>
-                <td class="titulo">${titulo}</td>
-                <td class="descripcion">${descripcion}</td>
-                <td class="estado">${estado}</td>
-                <td class="asignadaA">${asignadaA}</td>
-                <td>
-                    <button type="button" class="btn-action edit" onclick="openModalEditarTarea(${tareaID})">
-                        <i class='bx bxs-edit'></i>
-                    </button>
-                    <a href="javascript:void(0);" class="btn-action delete" onclick="confirmarEliminacion(${tareaID})">
-                        <i class='bx bxs-trash'></i>
-                    </a>
-                </td>
-            `;
-            tablaCuerpo.appendChild(nuevaFila);
-        }
+    // Escuchar el evento 'tarea_eliminada' para mostrar una notificación
+    socket.on('tarea_eliminada', function(data) {
+        alert(data.mensaje);
+        // Aquí podrías eliminar la tarea de la tabla sin recargarla
+        location.reload();  // Recargar la página si quieres eliminar la tarea de la tabla
     });
 </script>
 

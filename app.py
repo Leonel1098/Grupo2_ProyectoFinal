@@ -24,20 +24,6 @@ from routes.empleados import *              # Ruta de empleados
 from routes.tareas import *                 # Ruta de tareas
 from routes.permisos import *               # Ruta de permisos
 from routes.roles import *                  # Ruta de roles
-
-
-# Evento para emitir cuando se actualice o cree una tarea
-@socketio.on('tarea_creada')
-def handle_tarea_creada(data):
-    tarea_id = data.get('tareaID')
-    # Enviar un mensaje a todos los clientes conectados
-    emit('tarea_creada', {
-        'tareaID': tarea_id,
-        'titulo': "Ejemplo Título",
-        'descripcion': "Ejemplo Descripción",
-        'estado': "Pendiente",
-        'asignada_a': "Empleado X"
-    }, broadcast=True)
   
 
 if __name__ == "__main__":

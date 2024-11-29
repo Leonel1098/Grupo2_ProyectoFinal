@@ -31,8 +31,15 @@ def tareas():
         db.session.add(nueva_tarea)
         db.session.commit()
 
-        # Emitir evento WebSocket
-        socketio.emit('tarea_creada', {'mensaje': f'Nueva tarea "{titulo}" creada con éxito'})
+        # Emitir evento WebSocket para notificar a todos los usuarios
+        socketio.emit('tarea_creada', {
+            'mensaje': f'Nueva tarea "{titulo}" creada con éxito',
+            'tareaID': nueva_tarea.tareaID,
+            'titulo': nueva_tarea.titulo,
+            'descripcion': nueva_tarea.descripcion,
+            'estado': nueva_tarea.estado,
+            'asignadaA': nueva_tarea.asignadaA
+        })
 
         # Redirigir a la lista de tareas
         return redirect(url_for('tareas'))
@@ -83,17 +90,6 @@ def editarTarea():
 
     db.session.commit()
 
-    # Emitir evento WebSocket
-    socketio.emit('tarea_creada', {
-        'accion': 'editada',
-        'tarea': {
-            'tareaID': tarea.tareaID,
-            'titulo': tarea.titulo,
-            'descripcion': tarea.descripcion,
-            'estado': tarea.estado,
-            'asignadaA': tarea.asignadaA
-        }
-    })
     return redirect(url_for('tareas'))  # Redirigir a la lista de tareas después de guardar
 
 ########################################## Eliminar Tarea ##############################################
@@ -110,9 +106,6 @@ def eliminarTarea(tareaID):
         db.session.delete(tarea)
         db.session.commit()
     
-    # Emitir evento WebSocket
-        socketio.emit('tarea_creada', {
-            'accion': 'eliminada',
-            'tarea': tarea_info
-        })
+     # Emitir evento para notificar a todos los clientes
+    socketio.emit('tarea_eliminada', {'mensaje': f'Tarea con ID {tareaID} eliminada con éxito'})
     return redirect(url_for('tareas'))
