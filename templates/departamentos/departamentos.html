@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block content %}
+<main>
+    <div class="head-title">
+        <div class="left">
+            <h1>Lista de Departamentos</h1>
+        </div>
+        
+        <button onclick="openModalEmpresa()" class="btn-download"><i class='bx bxs-user-plus'></i> Agregar Departamento</button>
+    </div>
+
+    <div class="table-data">
+        <div class="order">
+            <div class="head">
+                <h3>Departamentos</h3>
+                <!-- Filtro de búsqueda -->
+                <input type="text" id="search-input" placeholder="Buscar departamentos..." class="search-input">
+            </div>
+                       
+            <div class="table-wrapper"> <!-- Contenedor con scroll -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>DEPARTAMENTO</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="empresa-table-body">
+                        {% for departamento in departamentos %}
+                        <tr>
+                            <td>{{ departamento.departamentoID }}</td>
+                            <td>{{ departamento.nombreDepartamento }}</td>
+                            <td>
+                                <!-- Botón de editar -->
+                                <a href="javascript:void(0);" class="btn-action edit" onclick="openModalEditarEmpresa({{ departamento.departamentoID }}, 
+                                    '{{ departamento.nombreDepartamento }}')"><i class='bx bxs-edit'></i>
+                                </a>
+                                <!-- Botón de eliminar -->
+                                <a href="javascript:void(0);" class="btn-action delete" onclick="confirmarEliminacion({{ departamento.departamentoID }})">
+                                    <i class='bx bxs-trash'></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+<!-- Modal para registrar empresa -->
+<main id="modalEmpresa" class="modal">
+    <div class="head-title">
+        <div class="left">
+            <h1>Nuevo Departamento</h1>
+        </div>
+    </div>
+    <div class="form-wrapper">
+        <form id="empresa-form" action="{{ url_for('nuevoDepartamento') }}" method="POST">            
+            <div class="form-group">
+                <label for="nombre">Nombre de Departamento</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Ingrese el nombre del departamento" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Guardar</button>
+                <a href="#" class="btn-cancel">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<!-- Modal para editar empresa -->
+<main id="modalEditarEmpresa" class="modal">
+    <div class="head-title">
+        <div class="left">
+            <h1>Editar Departamento</h1>
+        </div>
+    </div>
+
+    <div class="form-wrapper">
+        <form id="editar-empresa-form" action="{{ url_for('editarDepartamento') }}" method="POST">
+            <input type="hidden" id="empresa-id" name="departamentoID"> <!-- Campo oculto para el ID de la empresa -->
+
+            <div class="form-group">
+                <label for="nombre-editar">Nombre de Departamento</label>
+                <input type="text" id="nombre-editar" name="nombre" placeholder="Ingrese el nombre del departamento" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Guardar Cambios</button>
+                <a href="#" class="btn-cancel" onclick="closeModalEditarEmpresa()">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+    // ***************************** Modal para nuevo registro ************************************
+    // Función para abrir el modal
+    function openModalEmpresa() {
+        const modal = document.getElementById('modalEmpresa');
+        modal.classList.add('active');
+    }
+    
+    // Función para cerrar el modal
+    function closeModalEmpresa() {
+        const modal = document.getElementById('modalEmpresa');
+        modal.classList.remove('active');
+    }
+        
+    // Opcional: Manejar el botón "Cancelar"
+    document.querySelector('.btn-cancel').addEventListener('click', function (event) {
+        event.preventDefault(); // Evita que siga el enlace
+        closeModalEmpresa();
+    });
+
+    // ********************************* Modal para editar Registros *************************************
+    // Función para abrir el modal de editar
+    function openModalEditarEmpresa(empresaID, nombre) {
+        const modal = document.getElementById('modalEditarEmpresa');
+        document.getElementById('empresa-id').value = empresaID;
+        document.getElementById('nombre-editar').value = nombre;
+        modal.classList.add('active');
+    }
+
+    // Función para cerrar el modal de editar
+    function closeModalEditarEmpresa() {
+        const modal = document.getElementById('modalEditarEmpresa');
+        modal.classList.remove('active');
+    }
+
+    // ********************************* Confirmación para eliminar registro ***********************************
+    function confirmarEliminacion(departamentoID) {
+        // Mostrar una alerta de confirmación antes de eliminar
+        const confirmar = confirm("¿Estás seguro de que deseas eliminar este registro?");
+        
+        if (confirmar) {
+            // Si el usuario confirma, redirigir a la ruta de eliminación con el ID de la empresa
+            window.location.href = "/eliminarDepartamento/" + departamentoID; // Enviar al endpoint de eliminación
+        }
+    }
+</script>
+    
+
+{% endblock %}

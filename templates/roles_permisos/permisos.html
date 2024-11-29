@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<main>
+    <div class="head-title">
+        <div class="left">
+            <h1>Lista de Permisos</h1>
+        </div>
+        
+        <button onclick="openModalPermiso()" class="btn-download"><i class='bx bxs-user-plus'></i> Agregar Permisos</button>
+    </div>
+
+    <div class="table-data">
+        <div class="order">
+            <div class="head">
+                <h3>Permisos</h3>
+            </div>
+                       
+            <div class="table-wrapper"> <!-- Contenedor con scroll -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>PERMISO</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="permiso-table-body">
+                        {% for permiso in permisos %}
+                        <tr>
+                            <td>{{ permiso.permisoID }}</td>
+                            <td>{{ permiso.nombrePermiso }}</td>
+                            <td>
+                                <!-- Botón de eliminar -->
+                                <a href="javascript:void(0);" class="btn-action delete" onclick="confirmarEliminacion({{ permiso.permisoID }})">
+                                    <i class='bx bxs-trash'></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+<!-- Modal para agregar permiso -->
+<main id="modalPermiso" class="modal">
+    <div class="head-title">
+        <div class="left">
+            <h1>Nuevo Permiso</h1>
+        </div>
+    </div>
+    <div class="form-wrapper">
+        <form id="permiso-form" action="{{ url_for('nuevoPermiso') }}" method="POST">            
+            <div class="form-group">
+                <label for="nombre">Permiso de...</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Permiso de..." required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Guardar</button>
+                <a href="#" class="btn-cancel">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+    // ***************************** Modal para nuevo registro ************************************
+    // Función para abrir el modal
+    function openModalPermiso() {
+        const modal = document.getElementById('modalPermiso');
+        modal.classList.add('active');
+    }
+    
+    // Función para cerrar el modal
+    function closeModalPermiso() {
+        const modal = document.getElementById('modalPermiso');
+        modal.classList.remove('active');
+    }
+        
+    // Opcional: Manejar el botón "Cancelar"
+    document.querySelector('.btn-cancel').addEventListener('click', function (event) {
+        event.preventDefault(); // Evita que siga el enlace
+        closeModalPermiso();
+    });
+    
+    // ********************************* Confirmación para eliminar registro ***********************************
+    function confirmarEliminacion(permisoID) {
+        // Mostrar una alerta de confirmación antes de eliminar
+        const confirmar = confirm("¿Estás seguro de que deseas eliminar este registro?");
+        
+        if (confirmar) {
+            // Si el usuario confirma, redirigir a la ruta de eliminación con el ID de la empresa
+            window.location.href = "/eliminarPermiso/" + permisoID; // Enviar al endpoint de eliminación
+        }
+    }
+</script>
+    
+
+{% endblock %}

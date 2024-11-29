@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Boxicons -->
+    <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Gestor de Tareas</title>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <section id="sidebar">
+        <a href="{{ url_for('dashboard') }}" class="brand">
+            <i class='bx bxs-archive'></i>
+            <span class="text">Gestor de Tareas</span>
+        </a>
+        <ul class="side-menu top">
+            <li class="{% if active_page == 'dashboard' %}active{% endif %}">
+                <a href="{{ url_for('dashboard') }}">
+                    <i class='bx bxs-dashboard'></i>
+                    <span class="text">Dashboard</span>
+                </a>
+            </li>
+            <li class="{% if active_page == 'tareas' %}active{% endif %}">
+                <a href="{{ url_for('tareas') }}">
+                    <i class='bx bx-task'></i>
+                    <span class="text">Tareas</span>
+                </a>
+            </li>
+            
+            <li class="{% if active_page == 'usuarios' %}active{% endif %}">
+                <a href="{{ url_for('usuarios') }}" class="dropdown-btn">
+                    <i class='bx bxs-group'></i>
+                    <span class="text">Usuarios</span>
+                </a>
+            </li>
+            <li class="{% if active_page == 'empleados' %}active{% endif %}">
+                <a href="{{ url_for('empleados') }}">
+                    <i class='bx bxs-user-account'></i>
+                    <span class="text">Empleados</span>
+                </a>
+            </li>
+            <li class="{% if active_page == 'departamentos' %}active{% endif %}">
+                <a href="{{ url_for('departamentos') }}">
+                    <i class='bx bxs-business'></i>
+                    <span class="text">Departamentos</span>
+                </a>
+            </li>
+            <li class="{% if active_page == 'permisos' %}active{% endif %}">
+                <a href="{{ url_for('permisos') }}">
+                    <i class='bx bx-select-multiple'></i>
+                    <span class="text">Permisos</span>
+                </a>
+            </li>
+            <li class="{% if active_page == 'roles' %}active{% endif %}">
+                <a href="{{ url_for('roles') }}">
+                    <i class='bx bx-sitemap'></i>
+                    <span class="text">Roles</span>
+                </a>
+            </li>
+        </ul>
+        <ul class="side-menu">
+            <li>
+                <a href="#" class="logout">
+                    <i class='bx bxs-log-out-circle'></i>
+                    <span class="text">Cerrar Sesión</span>
+                </a>
+            </li>
+        </ul>
+    </section>
+    <!-- SIDEBAR -->
+
+    <!-- CONTENT -->
+    <section id="content">
+        <!-- NAVBAR -->
+        <nav>
+            <form action="#"></form>
+            <a href="#" class="notification">
+                <!-- <i class='bx bxs-bell'></i>
+                <span class="num">8</span> -->
+            </a>
+            <a href="#" class="profile">
+                <!-- <img src="static/img/people.png"> -->
+            </a>
+        </nav>
+        <!-- NAVBAR -->
+
+        {% block content %}{% endblock %}
+    </section>
+    <!-- CONTENT -->
+
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>

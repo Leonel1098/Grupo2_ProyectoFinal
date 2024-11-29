@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<main>
+    <form method="POST">
+        <div class="form-wrapper">
+            <div class="form-group">
+                <h1>ROL: {{ role.nombreRol }}</h1>
+                <br>
+                <div class="checkbox-group">
+                    {% for permiso in permisos %}
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="permiso-{{ permiso.permisoID }}" name="permisos" value="{{ permiso.permisoID }}">
+                        <label for="permiso-{{ permiso.permisoID }}">{{ permiso.nombrePermiso }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Guardar</button>
+                <a href="{{ url_for('roles') }}" class="btn-cancel">Cancelar</a>
+            </div>
+        </div>
+    </form>
+</main>
+{% endblock %}

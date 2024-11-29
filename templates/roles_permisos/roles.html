@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block content %}
+<main>
+    <div class="head-title">
+        <div class="left">
+            <h1>Lista de Roles</h1>
+        </div>
+        
+        <button onclick="openModalRol()" class="btn-download"><i class='bx bxs-user-plus'></i> Agregar Roles</button>
+    </div>
+
+    <div class="table-data">
+        <div class="order">
+            <div class="head">
+                <h3>Roles</h3>
+            </div>
+                       
+            <div class="table-wrapper"> <!-- Contenedor con scroll -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ROL</th>
+                            <th>PERMISOS</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="permiso-table-body">
+                        {% for rol in roles %}
+                        <tr>
+                            <td>{{ rol.rolID }}</td>
+                            <td>{{ rol.nombreRol }}</td>
+                            <td>
+                                <a href="{{ url_for('controlPermisos', rol_id=rol.rolID) }}" class="btn-action agregar">
+                                    Control de Permisos
+                                </a>
+                            </td>                            
+                            <td>
+                                <a href="javascript:void(0);" class="btn-action edit" onclick="openModalEditarRol({{ rol.rolID }}, 
+                                    '{{ rol.nombreRol }}')"><i class='bx bxs-edit'></i>
+                                </a>
+                                <a href="javascript:void(0);" class="btn-action delete" onclick="confirmarEliminacion({{ rol.rolID }})">
+                                    <i class='bx bxs-trash'></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+<!-- Modal para agregar rol -->
+<main id="modalRol" class="modal">
+    <div class="head-title">
+        <div class="left">
+            <h1>Nuevo Rol</h1>
+        </div>
+    </div>
+    <div class="form-wrapper">
+        <form id="rol-form" action="{{ url_for('nuevoRol') }}" method="POST">            
+            <div class="form-group">
+                <label for="nombre">Nombre de Rol</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Ingresa un nombre de Rol" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Guardar</button>
+                <a href="#" class="btn-cancel">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</main>
+<!-- Modal para editar rol -->
+<main id="modalEditarRol" class="modal">
+    <div class="head-title">
+        <div class="left">
+            <h1>Editar Rol</h1>
+        </div>
+    </div>
+
+    <div class="form-wrapper">
+        <form id="editar-rol-form" action="{{ url_for('editarRol') }}" method="POST">
+            <input type="hidden" id="rol-id" name="rolID"> <!-- Campo oculto para el ID de la empresa -->
+
+            <div class="form-group">
+                <label for="nombre-editar">Nombre de Rol</label>
+                <input type="text" id="nombre-editar" name="nombre" placeholder="Ingrese un nombre de Rol" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Guardar Cambios</button>
+                <a href="#" class="btn-cancel" onclick="closeModalEditarRol()">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // ***************************** Modal para nuevo registro ************************************
+    // Función para abrir el modal
+    function openModalRol() {
+        const modal = document.getElementById('modalRol');
+        modal.classList.add('active');
+    }
+    
+    // Función para cerrar el modal
+    function closeModalRol() {
+        const modal = document.getElementById('modalRol');
+        modal.classList.remove('active');
+    }
+        
+    // Opcional: Manejar el botón "Cancelar"
+    document.querySelector('.btn-cancel').addEventListener('click', function (event) {
+        event.preventDefault(); // Evita que siga el enlace
+        closeModalRol();
+    });
+    // ********************************* Modal para editar Registros *************************************
+    // Función para abrir el modal de editar
+    function openModalEditarRol(rolID, nombre) {
+        const modal = document.getElementById('modalEditarRol');
+        document.getElementById('rol-id').value = rolID;
+        document.getElementById('nombre-editar').value = nombre;
+        modal.classList.add('active');
+    }
+
+    // Función para cerrar el modal de editar
+    function closeModalEditarRol() {
+        const modal = document.getElementById('modalEditarRol');
+        modal.classList.remove('active');
+    }
+    
+    // ********************************* Confirmación para eliminar registro ***********************************
+    function confirmarEliminacion(rolID) {
+        // Mostrar una alerta de confirmación antes de eliminar
+        const confirmar = confirm("¿Estás seguro de que deseas eliminar este registro?");
+        
+        if (confirmar) {
+            // Si el usuario confirma, redirigir a la ruta de eliminación con el ID de la empresa
+            window.location.href = "/eliminarRol/" + rolID; // Enviar al endpoint de eliminación
+        }
+    }
+
+    // ********************************* Error de eliminación ***********************************
+    {% if error_message %}
+        alert("Error: {{ error_message }}");
+    {% elif success_message %}
+        alert("Éxito: {{ success_message }}");
+    {% endif %}
+
+</script>
+{% endblock %}

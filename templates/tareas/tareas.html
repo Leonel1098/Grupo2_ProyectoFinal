@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main>
+    <div class="head-title">
+        <div class="left">
+            <h1>Lista de Tareas</h1>
+        </div>
+
+        <button onclick="openModalTarea()" class="btn-download">
+            <i class='bx bxs-plus-circle'></i> Agregar Tarea
+        </button>
+    </div>
+
+    <div class="table-data">
+        <div class="order">
+            
+            <div class="head">
+                <!-- Filtro por estado -->
+                <form method="GET" action="{{ url_for('tareas') }}">
+                    <label for="estado">Filtrar por estado:</label>
+                    <select name="estado" onchange="this.form.submit()" class="filter-select">
+                        <option value="Todos" {% if request.args.get('estado') == 'Todos' %}selected{% endif %}>Todos</option>
+                        <option value="Pendiente" {% if request.args.get('estado') == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                        <option value="En Progreso" {% if request.args.get('estado') == 'En Progreso' %}selected{% endif %}>En Progreso</option>
+                        <option value="Completada" {% if request.args.get('estado') == 'Completada' %}selected{% endif %}>Completada</option>
+                    </select>
+                </form>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>TÍTULO</th>
+                            <th>DESCRIPCIÓN</th>
+                            <th>ESTADO</th>
+                            <th>ASIGNADA A</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tarea-table-body">
+                        {% for tarea in tareas %}
+                        <tr>
+                            <td>{{ tarea.tareaID }}</td>
+                            <td>{{ tarea.titulo }}</td>
+                            <td>{{ tarea.descripcion }}</td>
+                            <td>{{ tarea.estado }}</td>
+                            <td>{{ tarea.asignado_a.nombreEmpleado }}</td>
+                            <td>
+                                <button type="button" class="btn-action edit" onclick="openModalEditarTarea({{tarea.tareaID}})">
+                                    <i class='bx bxs-edit'></i>
+                                </button>
+                                <a href="javascript:void(0);" class="btn-action delete" onclick="confirmarEliminacion({{ tarea.tareaID }})">
+                                    <i class='bx bxs-trash'></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Modal para agregar tarea -->
+<main id="modalTarea" class="modal">
+    <div class="head-title">
+        <div class="left">
+            <h1>Agregar Nueva Tarea</h1>
+        </div>
+    </div>
+    <div class="form-wrapper">
+        <form id="tarea-form" action="{{ url_for('tareas') }}" method="POST">
+            <div class="form-group">
+                <label for="titulo">Título de la tarea</label>
+                <input type="text" id="titulo" name="titulo" placeholder="Ingrese el título de la tarea..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="descripcion">Descripción</label>
+                <textarea id="descripcion" name="descripcion" placeholder="Ingrese una descripción..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="estado">Estado</label>
+                <select id="estado" name="estado" required>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="En Progreso">En Progreso</option>
+                    <option value="Completada">Completada</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="asignadaA">Asignada a</label>
+                <select id="asignadaA" name="asignadaA" required>
+                    <option value="" disabled selected>Seleccione un empleado</option>
+                    {% for empleado in empleados %}
+                    <option value="{{ empleado.empleadoID }}">{{ empleado.nombreEmpleado }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Guardar</button>
+                <a href="#" class="btn-cancel" onclick="closeModalTarea()">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<!-- Modal para editar tarea -->
+<main id="modalEditarTarea" class="modal">
+    <div class="head-title">
+        <div class="left">
+            <h1>Editar Tarea</h1>
+        </div>
+    </div>
+    <div class="form-wrapper">
+        <form id="editar-tarea-form" action="{{ url_for('editarTarea') }}" method="POST">
+            <input type="hidden" id="editTareaID" name="tareaID">
+
+            <div class="form-group">
+                <label for="editTitulo">Título de la Tarea</label>
+                <input type="text" id="editTitulo" name="titulo" placeholder="Ingrese el título de la tarea" required>
+            </div>
+
+            <div class="form-group">
+                <label for="editDescripcion">Descripción</label>
+                <textarea id="editDescripcion" name="descripcion" placeholder="Ingrese la descripción de la tarea..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="editEstado">Estado</label>
+                <select class="select" id="editEstado" name="estado" required>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="En Progreso">En Progreso</option>
+                    <option value="Completada">Completada</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="editAsignadaA">Asignada a</label>
+                <select class="select" id="editAsignadaA" name="asignadaA" required>
+                    <option value="" disabled selected>Seleccione un empleado</option>
+                    {% for empleado in empleados %}
+                    <option value="{{ empleado.empleadoID }}">{{ empleado.nombreEmpleado }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Guardar Cambios</button>
+                <a href="#" class="btn-cancel" onclick="closeModalEditarTarea()">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+    function openModalTarea() {
+        document.getElementById('modalTarea').classList.add('active');
+    }
+
+    function closeModalTarea() {
+        document.getElementById('modalTarea').classList.remove('active');
+    }
+
+    // Función para abrir el modal de editar tarea y cargar los datos de la tarea
+    function openModalEditarTarea(tareaID) {
+        fetch(`/tarea/${tareaID}/editar`)  // Llamada AJAX para obtener los datos de la tarea
+            .then(response => response.json())
+            .then(data => {
+                // Rellenar el formulario con los datos obtenidos
+                document.getElementById('editTareaID').value = data.tareaID;
+                document.getElementById('editTitulo').value = data.titulo;
+                document.getElementById('editDescripcion').value = data.descripcion;
+                document.getElementById('editEstado').value = data.estado;
+                document.getElementById('editAsignadaA').value = data.asignadaA;
+    
+                // Mostrar el modal
+                const modal = document.getElementById('modalEditarTarea');
+                modal.classList.add('active');
+            })
+            .catch(error => console.error('Error al cargar los datos de la tarea:', error));
+    }
+
+    // Función para cerrar el modal
+    function closeModalTarea() {
+        const modal = document.getElementById('modalEditarTarea');
+        modal.classList.remove('active');
+    }
+
+    // ********************************* Confirmación para eliminar registro ***********************************
+    function confirmarEliminacion(tareaID) {
+        // Mostrar una alerta de confirmación antes de eliminar
+        const confirmar = confirm("¿Estás seguro de que deseas eliminar este registro?");
+        
+        if (confirmar) {
+            // Si el usuario confirma, redirigir a la ruta de eliminación con el ID de la empresa
+            window.location.href = "/eliminarTarea/" + tareaID; // Enviar al endpoint de eliminación
+        }
+    }
+</script>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+    // Establecer conexión con WebSocket
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    // Escuchar el evento 'tarea_creada' enviado desde el servidor
+    socket.on('tarea_creada', function(data) {
+        // Extraer la información de la tarea recibida
+        var tareaID = data.tarea.tareaID;
+        var titulo = data.tarea.titulo;
+        var descripcion = data.tarea.descripcion;
+        var estado = data.tarea.estado;
+        var asignadaA = data.tarea.asignado_a.nombreEmpleado;
+
+        // Seleccionar la fila correspondiente en la tabla por el ID de la tarea
+        var filaTarea = document.querySelector(`tr[data-id="${tareaID}"]`);
+        
+        if (filaTarea) {
+            // Si la fila existe, actualizar los valores de los campos
+            filaTarea.querySelector('.titulo').textContent = titulo;
+            filaTarea.querySelector('.descripcion').textContent = descripcion;
+            filaTarea.querySelector('.estado').textContent = estado;
+            filaTarea.querySelector('.asignadaA').textContent = asignadaA;
+            
+            // Opcional: Cambiar el color o resaltar la fila como indicativo de la actualización
+            filaTarea.classList.add('updated');
+            setTimeout(() => filaTarea.classList.remove('updated'), 2000);
+        } else {
+            // Si no existe, agregar una nueva fila en la tabla
+            var tablaCuerpo = document.getElementById('tarea-table-body');
+            var nuevaFila = document.createElement('tr');
+            nuevaFila.setAttribute('data-id', tareaID);
+
+            nuevaFila.innerHTML = `
+                <td>${tareaID}</td>
+                <td class="titulo">${titulo}</td>
+                <td class="descripcion">${descripcion}</td>
+                <td class="estado">${estado}</td>
+                <td class="asignadaA">${asignadaA}</td>
+                <td>
+                    <button type="button" class="btn-action edit" onclick="openModalEditarTarea(${tareaID})">
+                        <i class='bx bxs-edit'></i>
+                    </button>
+                    <a href="javascript:void(0);" class="btn-action delete" onclick="confirmarEliminacion(${tareaID})">
+                        <i class='bx bxs-trash'></i>
+                    </a>
+                </td>
+            `;
+            tablaCuerpo.appendChild(nuevaFila);
+        }
+    });
+</script>
+
+
+{% endblock %}

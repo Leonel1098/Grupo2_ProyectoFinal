@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block content %}
+<main>
+    <div class="head-title">
+        <div class="left">
+            <h1>Lista de Usuarios</h1>
+        </div>
+        
+        <button onclick="openModalUsuario()" class="btn-download"><i class='bx bxs-user-plus'></i> Agregar Usuario</button>
+    </div>
+
+    <div class="table-data">
+        <div class="order">
+            <div class="head">
+                <h3>Usuarios</h3>
+                <!-- Filtro de búsqueda -->
+                <form method="GET" action="{{ url_for('usuarios') }}">
+                    <input 
+                        type="text" 
+                        name="search" 
+                        placeholder="Buscar..." 
+                        class="search-input"
+                        value="{{ request.args.get('search', '') }}"
+                    >
+                </form>
+            </div>
+                       
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>EMPLEADO</th>
+                            <th>EMAIL</th>
+                            <th>USUARIO</th>
+                            <th>ROL</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usuario-table-body">
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.usuarioID }}</td>
+                            <td>{{ usuario.nombreEmpleado }}</td>
+                            <td>{{ usuario.correo }}</td>
+                            <td>{{ usuario.nombreUsuario }}</td>
+                            <td>{{ usuario.rol }}</td>
+                            <td>
+                                <button type="button" class="btn-action edit" onclick="openModalEditar({{ usuario.usuarioID }})">
+                                    <i class='bx bxs-edit'></i>
+                                </button>
+                                <a href="javascript:void(0);" class="btn-action delete" onclick="confirmarEliminacion({{ usuario.usuarioID }})">
+                                    <i class='bx bxs-trash'></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Modal para registrar usuario -->
+<main id="modalUsuario" class="modal">
+    <div class="head-title">
+        <div class="left">
+            <h1>Nuevo Usuario</h1>
+        </div>
+    </div>
+    <div class="form-wrapper">
+        <form id="usuario-form" action="{{ url_for('usuarios') }}" method="POST">
+            <div class="form-group">
+                <label for="nombre">Usuario</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Ingrese un nombre de usuario..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="empleado">Empleado</label>
+                <select class="select" id="empleado" name="empleado" required>
+                    <option value="" disabled selected>Seleccione un empleado</option>
+                    {% for empleado in empleados %}
+                    <option value="{{ empleado.empleadoID }}">{{ empleado.nombreEmpleado }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="rol">Rol</label>
+                <select class="select" id="rol" name="rol" required>
+                    <option value="" disabled selected>Seleccione un rol</option>
+                    {% for rol in roles %}
+                    <option value="{{ rol.rolID }}">{{ rol.nombreRol }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="contraseña">Ingrese una contraseña</label>
+                <input type="password" id="contraseña" name="contraseña" placeholder="Ingrese una contraseña..." required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Guardar</button>
+                <a href="#" class="btn-cancel" onclick="closeModalUsuario()">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<!-- Modal para editar usuario -->
+<main id="modalEditarUsuario" class="modal">
+    <div class="head-title">
+        <div class="left">
+            <h1>Editar Usuario</h1>
+        </div>
+    </div>
+    <div class="form-wrapper">
+        <form id="editar-usuario-form" action="{{ url_for('editar_usuario', usuarioID=0) }}" method="POST">
+            <div class="form-group">
+                <label for="nombreUsuario">Usuario</label>
+                <input type="text" id="nombreUsuario" name="nombreUsuario" placeholder="Editar nombre de usuario..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="rol">Rol</label>
+                <select class="select" id="rol" name="rol" required>
+                    <option value="" disabled selected>Seleccione un rol</option>
+                    {% for rol in roles %}
+                    <option value="{{ rol.rolID }}">{{ rol.nombreRol }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Actualizar</button>
+                <a href="#" class="btn-cancel" onclick="closeModalEditar()">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+    // Función para abrir el modal
+    function openModalUsuario() {
+        const modal = document.getElementById('modalUsuario');
+        modal.classList.add('active');
+    }
+    
+    // Función para cerrar el modal
+    function closeModalUsuario() {
+        const modal = document.getElementById('modalUsuario');
+        modal.classList.remove('active');
+    }
+
+    // Función para abrir el modal de edición
+    function openModalEditar(usuarioID) {
+        // Obtener el modal y el formulario
+        const modal = document.getElementById('modalEditarUsuario');
+        const form = document.getElementById('editar-usuario-form');
+
+        // Asignar la URL de acción del formulario con el ID del usuario
+        form.action = `/editar_usuario/${usuarioID}`;
+
+        // Obtener los datos del usuario (puedes hacer una petición AJAX o asignar datos manualmente)
+        fetch(`/usuario/${usuarioID}`)
+            .then(response => response.json())
+            .then(data => {
+                // Llenar los campos del formulario con los datos del usuario
+                document.getElementById('nombreUsuario').value = data.nombreUsuario;
+                document.getElementById('rol').value = data.rolID;
+            });
+
+        // Mostrar el modal
+        modal.classList.add('active');
+    }
+
+    // Función para cerrar el modal
+    function closeModalEditar() {
+        const modal = document.getElementById('modalEditarUsuario');
+        modal.classList.remove('active');
+    }
+
+    
+    // Función para confirmar la eliminación
+    function confirmarEliminacion(usuarioID) {
+        const confirmar = confirm("¿Estás seguro de que deseas eliminar este registro?");
+        if (confirmar) {
+            window.location.href = "/eliminarUsuario/" + usuarioID;
+        }
+    }
+</script>
+
+{% endblock %}

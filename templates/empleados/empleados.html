@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block content %}
+<main>
+    <div class="head-title">
+        <div class="left">
+            <h1>Lista de Empleados</h1>
+        </div>
+        
+        <button onclick="openModalEmpleado()" class="btn-download"><i class='bx bxs-user-plus'></i> Agregar Empleado</button>
+    </div>
+
+    <div class="table-data">
+        <div class="order">
+            <div class="head">
+                <h3>Empleados</h3>
+                <!-- Filtro de búsqueda -->
+                <form method="GET" action="{{ url_for('empleados') }}">
+                    <input 
+                        type="text" 
+                        name="search" 
+                        placeholder="Buscar..." 
+                        class="search-input"
+                        value="{{ request.args.get('search', '') }}"
+                    >
+                </form>
+            </div>
+                       
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>EMPLEADO</th>
+                            <th>EMAIL</th>
+                            <th>ADMINISTRADOR</th>
+                            <th>DEPARTAMENTO</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employee-table-body">
+                        {% for empleado in empleados %}
+                        <tr>
+                            <td>{{ empleado.empleadoID }}</td>
+                            <td>{{ empleado.nombreEmpleado }}</td>
+                            <td>{{ empleado.correo }}</td>
+                            <td>{{ empleado.esAdministrador }}</td>
+                            <td>{{ empleado.nombreDepartamento }}</td>
+                            <td>
+                                <button type="button" class="btn-action edit" onclick="openModalEditar({{ empleado.empleadoID }})">
+                                    <i class='bx bxs-edit'></i>
+                                </button>
+                                <a href="javascript:void(0);" class="btn-action delete" onclick="confirmarEliminacion({{ empleado.empleadoID }})">
+                                    <i class='bx bxs-trash'></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Modal para registrar empleado -->
+<main id="modalEmpleado" class="modal">
+    <div class="head-title">
+        <div class="left">
+            <h1>Nuevo Empleado</h1>
+        </div>
+    </div>
+    <div class="form-wrapper">
+        <form id="employee-form" action="{{ url_for('empleados') }}" method="POST">
+            <div class="form-group">
+                <label for="nombre">Nombre Completo</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Ingrese el nombre" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Correo Electrónico</label>
+                <input type="email" id="email" name="email" placeholder="Ingrese el correo electrónico" required>
+            </div>
+
+            <div class="form-group">
+                <label for="admin">¿Es administrador?</label>
+                <input type="checkbox" id="admin" name="admin">
+            </div>
+
+            <div class="form-group">
+                <label for="departamento">Departamento</label>
+                <select class="select" id="departamento" name="departamento" required>
+                    <option value="" disabled selected>Seleccione un departamento</option>
+                    {% for departamento in departamentos %}
+                    <option value="{{ departamento.departamentoID }}">{{ departamento.nombreDepartamento }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Guardar</button>
+                <a href="#" class="btn-cancel" onclick="closeModalEmpleado()">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<!-- Modal para editar empleado -->
+<main id="modalEditarEmpleado" class="modal">
+    <div class="head-title">
+        <div class="left">
+            <h1>Editar Empleado</h1>
+        </div>
+    </div>
+    <div class="form-wrapper">
+        <form id="employee-edit-form" action="{{ url_for('editarEmpleado') }}" method="POST">
+            <input type="hidden" id="editEmpleadoID" name="empleadoID">
+
+            <div class="form-group">
+                <label for="editNombre">Nombre Completo</label>
+                <input type="text" id="editNombre" name="nombre" placeholder="Ingrese el nombre" required>
+            </div>
+
+            <div class="form-group">
+                <label for="editEmail">Correo Electrónico</label>
+                <input type="email" id="editEmail" name="email" placeholder="Ingrese el correo electrónico" required>
+            </div>
+
+            <div class="form-group">
+                <label for="editAdmin">¿Es administrador?</label>
+                <input type="checkbox" id="editAdmin" name="admin">
+            </div>
+
+            <div class="form-group">
+                <label for="editDepartamento">Departamento</label>
+                <select class="select" id="editDepartamento" name="departamento" required>
+                    <option value="" disabled selected>Seleccione un departamento</option>
+                    {% for departamento in departamentos %}
+                    <option value="{{ departamento.departamentoID }}">{{ departamento.nombreDepartamento }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Guardar Cambios</button>
+                <a href="#" class="btn-cancel" onclick="closeModalEditar()">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+    // Modal para nuevo empleado
+    function openModalEmpleado() {
+        document.getElementById('modalEmpleado').classList.add('active');
+    }
+    function closeModalEmpleado() {
+        document.getElementById('modalEmpleado').classList.remove('active');
+    }
+
+    // Modal para editar empleado
+    function openModalEditar(empleadoID) {
+        fetch(`/empleado/${empleadoID}/editar`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('editEmpleadoID').value = data.empleadoID;
+                document.getElementById('editNombre').value = data.nombreEmpleado;
+                document.getElementById('editEmail').value = data.correo;
+                document.getElementById('editAdmin').checked = data.esAdministrador === "SI";
+                document.getElementById('editDepartamento').value = data.departamentoID;
+                document.getElementById('modalEditarEmpleado').classList.add('active');
+            });
+    }
+    function closeModalEditar() {
+        document.getElementById('modalEditarEmpleado').classList.remove('active');
+    }
+
+    // ********************************* Confirmación para eliminar registro ***********************************
+    function confirmarEliminacion(empleadoID) {
+        // Mostrar una alerta de confirmación antes de eliminar
+        const confirmar = confirm("¿Estás seguro de que deseas eliminar este registro?");
+        
+        if (confirmar) {
+            // Si el usuario confirma, redirigir a la ruta de eliminación con el ID de la empresa
+            window.location.href = "/eliminarEmpleado/" + empleadoID; // Enviar al endpoint de eliminación
+        }
+    }
+</script>
+
+{% endblock %}

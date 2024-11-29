@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<main>
+    <div class="head-title">
+        <div class="left">
+            <h1>Gestión de Tareas</h1>
+        </div>
+    </div>
+
+    <ul class="box-info">
+        <!-- Tareas Pendientes -->
+        <li>
+            <i class='bx bxs-error-circle' ></i>
+            <span class="text">
+                <h2>PENDIENTES</h3>
+                <h3>{{ tareas_pendientes_count }}</h3>
+            </span>
+        </li>
+        <!-- Tareas en Progreso -->
+        <li>
+            <i class='bx bx-trending-up'></i>
+            <span class="text">
+                <h2>EN PROGRESO</h2>
+                <h3>{{ tareas_en_progreso_count }}</h3>
+            </span>
+        </li>
+        <!-- Tareas Completadas -->
+        <li>
+            <i class='bx bxs-calendar-check'></i>
+            <span class="text">
+                <h2>COMPLETADAS</h2>
+                <h3>{{ tareas_completadas_count }}</h3>
+            </span>
+        </li>
+    </ul>
+
+</main>
+{% endblock %}
